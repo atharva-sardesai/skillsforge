@@ -1,2 +1,2 @@
 [deploy]
-startCommand = "npx prisma db push && npm start"
+startCommand = "npx prisma db push && next start -p ${PORT:-3000}"
