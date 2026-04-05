@@ -15,18 +15,18 @@ export default auth((req) => {
   const isAuthRoute = authRoutes.some((r) => pathname.startsWith(r))
 
   // Redirect authenticated users away from auth pages
-  if (isAuthRoute && session) {
+  if (isAuthRoute && session?.user) {
     return NextResponse.redirect(new URL('/dashboard', nextUrl))
   }
 
   // Require auth for protected student routes
-  if (isProtectedRoute && !session) {
+  if (isProtectedRoute && !session?.user) {
     return NextResponse.redirect(new URL('/login', nextUrl))
   }
 
   // Require admin role for admin routes
   if (isAdminRoute) {
-    if (!session) {
+    if (!session?.user) {
       return NextResponse.redirect(new URL('/login', nextUrl))
     }
     if ((session.user as { role?: string })?.role === 'STUDENT') {
