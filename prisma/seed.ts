@@ -335,6 +335,22 @@ async function main() {
     }
   }
 
+  // Create admin user first (needed for resource uploadedBy)
+  const adminPassword = await bcrypt.hash('admin123', 12)
+  const admin = await prisma.user.create({
+    data: {
+      name: 'Admin',
+      email: 'admin@skillforge.dev',
+      passwordHash: adminPassword,
+      role: 'ADMIN',
+      level: 10,
+      xp: 5000,
+      streakDays: 30,
+      lastActiveAt: new Date(),
+    },
+  })
+  console.log('✅ Created admin user (admin@skillforge.dev / admin123)')
+
   // Create dummy resources for each topic
   const resourceData: Record<string, Array<{ title: string; description: string; type: 'PDF' | 'PPTX'; fileName: string }>> = {
     'ai-ml': [
@@ -374,8 +390,9 @@ async function main() {
           description: r.description,
           type: r.type,
           fileName: r.fileName,
-          fileUrl: `/uploads/resources/${slug}/${r.fileName}`,
+          filePath: `/uploads/resources/${slug}/${r.fileName}`,
           fileSize: Math.floor(Math.random() * 4000000) + 500000,
+          uploadedBy: admin.id,
           status: 'PUBLISHED',
           downloadCount: Math.floor(Math.random() * 120),
         },
@@ -384,21 +401,6 @@ async function main() {
   }
   console.log('✅ Created dummy resources')
 
-  // Create admin user
-  const adminPassword = await bcrypt.hash('admin123', 12)
-  const admin = await prisma.user.create({
-    data: {
-      name: 'Admin',
-      email: 'admin@skillforge.dev',
-      passwordHash: adminPassword,
-      role: 'ADMIN',
-      level: 10,
-      xp: 5000,
-      streakDays: 30,
-      lastActiveAt: new Date(),
-    },
-  })
-  console.log('✅ Created admin user (admin@skillforge.dev / admin123)')
 
   // Create demo student
   const studentPassword = await bcrypt.hash('student123', 12)
