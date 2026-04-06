@@ -474,8 +474,6 @@ async function main() {
         quizId: quiz.id,
         score: attempt.score,
         totalTime: Math.floor(Math.random() * 600) + 300,
-        passed: attempt.score >= 70,
-        xpEarned: attempt.score === 100 ? 150 : 50,
         completedAt: new Date(Date.now() - attempt.daysAgo * 86400000),
       },
     })
