@@ -336,30 +336,30 @@ async function main() {
   }
 
   // Create dummy resources for each topic
-  const resourceData: Record<string, Array<{ title: string; description: string; type: 'PDF' | 'PPTX' }>> = {
+  const resourceData: Record<string, Array<{ title: string; description: string; type: 'PDF' | 'PPTX'; fileName: string }>> = {
     'ai-ml': [
-      { title: 'Introduction to Machine Learning', description: 'Comprehensive guide covering supervised, unsupervised, and reinforcement learning fundamentals.', type: 'PDF' },
-      { title: 'Deep Learning Slides', description: 'Lecture slides on neural networks, CNNs, RNNs, and transformer architectures.', type: 'PPTX' },
+      { title: 'Introduction to Machine Learning', description: 'Comprehensive guide covering supervised, unsupervised, and reinforcement learning fundamentals.', type: 'PDF', fileName: 'intro-to-ml.pdf' },
+      { title: 'Deep Learning Slides', description: 'Lecture slides on neural networks, CNNs, RNNs, and transformer architectures.', type: 'PPTX', fileName: 'deep-learning-slides.pptx' },
     ],
     'cybersecurity': [
-      { title: 'OWASP Top 10 Guide', description: 'Detailed breakdown of the OWASP Top 10 vulnerabilities with mitigation strategies.', type: 'PDF' },
-      { title: 'Network Security Fundamentals', description: 'Slides covering firewalls, IDS/IPS, VPNs, and cryptography basics.', type: 'PPTX' },
+      { title: 'OWASP Top 10 Guide', description: 'Detailed breakdown of the OWASP Top 10 vulnerabilities with mitigation strategies.', type: 'PDF', fileName: 'owasp-top-10.pdf' },
+      { title: 'Network Security Fundamentals', description: 'Slides covering firewalls, IDS/IPS, VPNs, and cryptography basics.', type: 'PPTX', fileName: 'network-security.pptx' },
     ],
     'cloud-devops': [
-      { title: 'AWS Solutions Architect Notes', description: 'Study notes for AWS core services: EC2, S3, RDS, Lambda, VPC, IAM.', type: 'PDF' },
-      { title: 'Kubernetes & Docker Overview', description: 'Container orchestration concepts, Helm charts, and CI/CD pipeline design.', type: 'PPTX' },
+      { title: 'AWS Solutions Architect Notes', description: 'Study notes for AWS core services: EC2, S3, RDS, Lambda, VPC, IAM.', type: 'PDF', fileName: 'aws-architect-notes.pdf' },
+      { title: 'Kubernetes & Docker Overview', description: 'Container orchestration concepts, Helm charts, and CI/CD pipeline design.', type: 'PPTX', fileName: 'kubernetes-docker.pptx' },
     ],
     'dsa': [
-      { title: 'Big-O Cheat Sheet', description: 'Time and space complexity reference for all major data structures and algorithms.', type: 'PDF' },
-      { title: 'Dynamic Programming Patterns', description: 'Slides covering memoization, tabulation, and the 15 most common DP patterns.', type: 'PPTX' },
+      { title: 'Big-O Cheat Sheet', description: 'Time and space complexity reference for all major data structures and algorithms.', type: 'PDF', fileName: 'big-o-cheatsheet.pdf' },
+      { title: 'Dynamic Programming Patterns', description: 'Slides covering memoization, tabulation, and the 15 most common DP patterns.', type: 'PPTX', fileName: 'dp-patterns.pptx' },
     ],
     'system-design': [
-      { title: 'System Design Interview Handbook', description: 'Step-by-step approach to designing scalable systems: estimation, components, trade-offs.', type: 'PDF' },
-      { title: 'Distributed Systems Concepts', description: 'CAP theorem, consistency models, sharding, replication, and load balancing.', type: 'PPTX' },
+      { title: 'System Design Interview Handbook', description: 'Step-by-step approach to designing scalable systems: estimation, components, trade-offs.', type: 'PDF', fileName: 'system-design-handbook.pdf' },
+      { title: 'Distributed Systems Concepts', description: 'CAP theorem, consistency models, sharding, replication, and load balancing.', type: 'PPTX', fileName: 'distributed-systems.pptx' },
     ],
     'fullstack': [
-      { title: 'React & Next.js Best Practices', description: 'Performance patterns, state management, SSR vs CSR, and deployment strategies.', type: 'PDF' },
-      { title: 'REST vs GraphQL vs tRPC', description: 'API design comparison slides with real-world use cases and implementation examples.', type: 'PPTX' },
+      { title: 'React & Next.js Best Practices', description: 'Performance patterns, state management, SSR vs CSR, and deployment strategies.', type: 'PDF', fileName: 'react-nextjs-best-practices.pdf' },
+      { title: 'REST vs GraphQL vs tRPC', description: 'API design comparison slides with real-world use cases and implementation examples.', type: 'PPTX', fileName: 'api-design-comparison.pptx' },
     ],
   }
 
@@ -373,7 +373,8 @@ async function main() {
           title: r.title,
           description: r.description,
           type: r.type,
-          fileUrl: `/uploads/resources/${slug}/placeholder.${r.type.toLowerCase()}`,
+          fileName: r.fileName,
+          fileUrl: `/uploads/resources/${slug}/${r.fileName}`,
           fileSize: Math.floor(Math.random() * 4000000) + 500000,
           status: 'PUBLISHED',
           downloadCount: Math.floor(Math.random() * 120),
