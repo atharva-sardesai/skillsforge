@@ -335,6 +335,54 @@ async function main() {
     }
   }
 
+  // Create dummy resources for each topic
+  const resourceData: Record<string, Array<{ title: string; description: string; type: 'PDF' | 'PPTX' }>> = {
+    'ai-ml': [
+      { title: 'Introduction to Machine Learning', description: 'Comprehensive guide covering supervised, unsupervised, and reinforcement learning fundamentals.', type: 'PDF' },
+      { title: 'Deep Learning Slides', description: 'Lecture slides on neural networks, CNNs, RNNs, and transformer architectures.', type: 'PPTX' },
+    ],
+    'cybersecurity': [
+      { title: 'OWASP Top 10 Guide', description: 'Detailed breakdown of the OWASP Top 10 vulnerabilities with mitigation strategies.', type: 'PDF' },
+      { title: 'Network Security Fundamentals', description: 'Slides covering firewalls, IDS/IPS, VPNs, and cryptography basics.', type: 'PPTX' },
+    ],
+    'cloud-devops': [
+      { title: 'AWS Solutions Architect Notes', description: 'Study notes for AWS core services: EC2, S3, RDS, Lambda, VPC, IAM.', type: 'PDF' },
+      { title: 'Kubernetes & Docker Overview', description: 'Container orchestration concepts, Helm charts, and CI/CD pipeline design.', type: 'PPTX' },
+    ],
+    'dsa': [
+      { title: 'Big-O Cheat Sheet', description: 'Time and space complexity reference for all major data structures and algorithms.', type: 'PDF' },
+      { title: 'Dynamic Programming Patterns', description: 'Slides covering memoization, tabulation, and the 15 most common DP patterns.', type: 'PPTX' },
+    ],
+    'system-design': [
+      { title: 'System Design Interview Handbook', description: 'Step-by-step approach to designing scalable systems: estimation, components, trade-offs.', type: 'PDF' },
+      { title: 'Distributed Systems Concepts', description: 'CAP theorem, consistency models, sharding, replication, and load balancing.', type: 'PPTX' },
+    ],
+    'fullstack': [
+      { title: 'React & Next.js Best Practices', description: 'Performance patterns, state management, SSR vs CSR, and deployment strategies.', type: 'PDF' },
+      { title: 'REST vs GraphQL vs tRPC', description: 'API design comparison slides with real-world use cases and implementation examples.', type: 'PPTX' },
+    ],
+  }
+
+  for (const [slug, resources] of Object.entries(resourceData)) {
+    const topicId = topicMap[slug]
+    if (!topicId) continue
+    for (const r of resources) {
+      await prisma.resource.create({
+        data: {
+          topicId,
+          title: r.title,
+          description: r.description,
+          type: r.type,
+          fileUrl: `/uploads/resources/${slug}/placeholder.${r.type.toLowerCase()}`,
+          fileSize: Math.floor(Math.random() * 4000000) + 500000,
+          status: 'PUBLISHED',
+          downloadCount: Math.floor(Math.random() * 120),
+        },
+      })
+    }
+  }
+  console.log('✅ Created dummy resources')
+
   // Create admin user
   const adminPassword = await bcrypt.hash('admin123', 12)
   const admin = await prisma.user.create({
@@ -367,49 +415,77 @@ async function main() {
   })
   console.log('✅ Created demo student (student@demo.com / student123)')
 
-  // Create topic progress for demo student
-  const mlTopicId = topicMap['ai-ml']
-  const dsaTopicId = topicMap['dsa']
+  // Create topic progress for demo student across all topics
+  const topicProgressData = [
+    { slug: 'ai-ml',        mastery: 72, known: 7,  total: 10, quizzes: 2, avg: 75.0, time: 3600,  daysAgo: 0 },
+    { slug: 'dsa',          mastery: 58, known: 5,  total: 10, quizzes: 1, avg: 60.0, time: 1800,  daysAgo: 1 },
+    { slug: 'cybersecurity',mastery: 81, known: 9,  total: 10, quizzes: 3, avg: 83.0, time: 4200,  daysAgo: 2 },
+    { slug: 'cloud-devops', mastery: 45, known: 4,  total: 10, quizzes: 1, avg: 50.0, time: 1200,  daysAgo: 3 },
+    { slug: 'system-design',mastery: 63, known: 6,  total: 10, quizzes: 2, avg: 68.0, time: 2700,  daysAgo: 5 },
+    { slug: 'fullstack',    mastery: 90, known: 10, total: 10, quizzes: 4, avg: 92.0, time: 6000,  daysAgo: 0 },
+  ]
 
-  if (mlTopicId) {
+  for (const tp of topicProgressData) {
+    const topicId = topicMap[tp.slug]
+    if (!topicId) continue
     await prisma.topicProgress.create({
       data: {
         userId: student.id,
-        topicId: mlTopicId,
-        masteryScore: 72,
-        flashcardsKnown: 7,
-        flashcardsTotal: 10,
-        quizzesTaken: 2,
-        avgQuizScore: 75.0,
-        timeSpent: 3600,
-        lastAccessedAt: new Date(),
+        topicId,
+        masteryScore: tp.mastery,
+        flashcardsKnown: tp.known,
+        flashcardsTotal: tp.total,
+        quizzesTaken: tp.quizzes,
+        avgQuizScore: tp.avg,
+        timeSpent: tp.time,
+        lastAccessedAt: new Date(Date.now() - tp.daysAgo * 86400000),
       },
     })
   }
 
-  if (dsaTopicId) {
-    await prisma.topicProgress.create({
+  // Create quiz attempts for demo student
+  const quizAttemptData = [
+    { slug: 'ai-ml',         score: 80, daysAgo: 0 },
+    { slug: 'ai-ml',         score: 70, daysAgo: 3 },
+    { slug: 'cybersecurity', score: 90, daysAgo: 1 },
+    { slug: 'cybersecurity', score: 80, daysAgo: 4 },
+    { slug: 'cybersecurity', score: 80, daysAgo: 6 },
+    { slug: 'fullstack',     score: 100,daysAgo: 0 },
+    { slug: 'fullstack',     score: 90, daysAgo: 2 },
+    { slug: 'fullstack',     score: 90, daysAgo: 5 },
+    { slug: 'fullstack',     score: 90, daysAgo: 7 },
+    { slug: 'dsa',           score: 60, daysAgo: 1 },
+    { slug: 'system-design', score: 70, daysAgo: 2 },
+    { slug: 'system-design', score: 60, daysAgo: 6 },
+    { slug: 'cloud-devops',  score: 50, daysAgo: 3 },
+  ]
+
+  for (const attempt of quizAttemptData) {
+    const topicId = topicMap[attempt.slug]
+    if (!topicId) continue
+    const quiz = await prisma.quiz.findFirst({ where: { topicId } })
+    if (!quiz) continue
+    await prisma.quizAttempt.create({
       data: {
         userId: student.id,
-        topicId: dsaTopicId,
-        masteryScore: 58,
-        flashcardsKnown: 5,
-        flashcardsTotal: 10,
-        quizzesTaken: 1,
-        avgQuizScore: 60.0,
-        timeSpent: 1800,
-        lastAccessedAt: new Date(Date.now() - 86400000),
+        quizId: quiz.id,
+        score: attempt.score,
+        totalTime: Math.floor(Math.random() * 600) + 300,
+        passed: attempt.score >= 70,
+        xpEarned: attempt.score === 100 ? 150 : 50,
+        completedAt: new Date(Date.now() - attempt.daysAgo * 86400000),
       },
     })
   }
+  console.log('✅ Created quiz attempts for demo student')
 
-  // Give student some badges
-  await prisma.userBadge.create({
-    data: {
-      userId: student.id,
-      badgeId: createdBadges[4].id, // Topic Explorer
-      earnedAt: new Date(Date.now() - 7 * 86400000),
-    },
+  // Give student multiple badges
+  await prisma.userBadge.createMany({
+    data: [
+      { userId: student.id, badgeId: createdBadges[0].id, earnedAt: new Date(Date.now() - 7 * 86400000) },   // 7-Day Streak
+      { userId: student.id, badgeId: createdBadges[1].id, earnedAt: new Date(Date.now() - 3 * 86400000) },   // Quiz Master
+      { userId: student.id, badgeId: createdBadges[4].id, earnedAt: new Date(Date.now() - 10 * 86400000) },  // Topic Explorer
+    ],
   })
 
   console.log('✅ Created topic progress and badges for demo student')
